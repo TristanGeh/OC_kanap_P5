@@ -1,8 +1,4 @@
 import { fetchJSON } from "./functions/api.js";
-//Constantes URL
-const str = window.location.href;
-const url = new URL (str);
-const id = url.searchParams.get("id");
 // Les fonctions 
 /**
  * Génération des éléments descriptifs du produit
@@ -15,30 +11,31 @@ function generateProduct (product){
     const price = document.querySelector ("#price");
     const desc = document.querySelector ("#description");
     const colors = document.querySelector ("#colors");
-
-    /*for (let i in colors){
+    for (let color of product.colors){
         const colorsChoice = document.createElement ("option");
-        colors.setAttribute (`value= "${product.colors[i]}"`, "${product.colors[i]}")
-    }*/
-    while (id === product._id){
-        productImage.src = product.imageUrl;
-        productImage.alt = product.altTxt;
-        title.innerText = product.name;
-        price.innerText = product.price;
-        desc.innerText = product.description;
+        colorsChoice.setAttribute ("value" , color);
+        colorsChoice.textContent = color;
+        colors.appendChild(colorsChoice)
     }
+    productImage.src = product.imageUrl;
+    productImage.alt = product.altTxt;
+    title.innerText = product.name;
+    price.innerText = product.price;
+    desc.innerText = product.description;
+    
     itemImg.appendChild(productImage);
-    colors.appendChild(colorsChoice);
 }
 
 /**
  * Récupération des données de l'API
  */
 async function generateProductSheet() {
-    const canapes = await fetchJSON('http://localhost:3000/api/products');
-    canapes.forEach(element => {
-        generateProduct(element)
-    }); 
+    //Constantes URL
+    const str = window.location.href;
+    const url = new URL (str);
+    const id = url.searchParams.get("id");
+    const canapes = await fetchJSON('http://localhost:3000/api/products/'+ id);
+    generateProduct(canapes); 
 }
 /**
  * Initialisation de la récupération des données de l'API et de créations des éléments

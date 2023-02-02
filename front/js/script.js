@@ -5,7 +5,6 @@ import { fetchJSON } from "./functions/api.js";
  * @param {*} article 
  */
 function generateArticle(article){
-    const sectionItems = document.querySelector(".items");
         // Création de l'ancre
     const ancreCanape = document.createElement("a");
     ancreCanape.href ="./product.html?id=" + article._id;     
@@ -21,12 +20,12 @@ function generateArticle(article){
     descCanape.classList.add (`productDescription`);
     descCanape.innerText = article.description;
 
-    sectionItems.appendChild(ancreCanape);
     ancreCanape.appendChild(articleCanape);
     articleCanape.appendChild(imgCanape);
     articleCanape.appendChild(titleCanape);
     articleCanape.appendChild(descCanape)
 
+    return ancreCanape;
 }
 
 /**
@@ -35,7 +34,10 @@ function generateArticle(article){
 async function generateArticles() {
     const canapes = await fetchJSON('http://localhost:3000/api/products');
     canapes.forEach(element => {
-        generateArticle(element)  
+        const card = generateArticle(element)
+        
+        const sectionItems = document.querySelector(".items");
+        sectionItems.appendChild(card)
     }); 
 }
 /**
