@@ -1,3 +1,4 @@
+// Appel de l'API
 export async function fetchJSON (url){
     const r = await fetch(url)
     if (r.ok){

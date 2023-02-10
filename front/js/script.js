@@ -35,7 +35,6 @@ async function generateArticles() {
     const canapes = await fetchJSON('http://localhost:3000/api/products');
     canapes.forEach(element => {
         const card = generateArticle(element)
-        
         const sectionItems = document.querySelector(".items");
         sectionItems.appendChild(card)
     }); 

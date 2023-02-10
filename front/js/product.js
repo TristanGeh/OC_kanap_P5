@@ -1,4 +1,44 @@
 import { fetchJSON } from "./functions/api.js";
+// Les variables globales
+let productInf = [];
+const str = window.location.href;
+const url = new URL (str);
+const id = url.searchParams.get("id");
+
+// Récupération des données du local storage
+const localData = localStorage.getItem("product");
+if (localData) {
+  productInf = JSON.parse(localData);
+}
+
+// LOCAL STORAGE
+//Ajout d'un produit au local storage
+function addToCart (){
+  // Récuperer la couleur
+  let select = document.getElementById("colors");
+  let colorValue = select.options[select.selectedIndex].value;
+  // Récuperer la quantité souhaitée
+  let itemQuantity = document.getElementById("quantity").value;
+  
+  let existingProduct = productInf.find(function(product) {
+    return product.productId === id && product.productColor === colorValue;
+  });
+    
+  if (existingProduct) {
+    existingProduct.productQuantity = itemQuantity;
+  } else {
+    let newProduct = {
+      productId: id,
+      productColor: colorValue,
+      productQuantity: itemQuantity
+    };
+    productInf.push(newProduct);
+  }
+  
+  localStorage.setItem("product", JSON.stringify(productInf));
+}
+
+//DOM
 // Les fonctions 
 /**
  * Génération des éléments descriptifs du produit
@@ -30,10 +70,6 @@ function generateProduct (product){
  * Récupération des données de l'API
  */
 async function generateProductSheet() {
-    //Constantes URL
-    const str = window.location.href;
-    const url = new URL (str);
-    const id = url.searchParams.get("id");
     const canapes = await fetchJSON('http://localhost:3000/api/products/'+ id);
     generateProduct(canapes); 
 }
@@ -45,3 +81,5 @@ async function init(){
 }
 // Le code principal 
 init();
+let addCart = document.querySelector("#addToCart");
+addCart.addEventListener("click", addToCart);
