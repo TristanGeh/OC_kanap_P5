@@ -27,6 +27,7 @@ function generateProductArticle(canape, cartProduct) {
   color.innerText = cartProduct.productColor;
   const price = document.createElement("p");
   price.innerText = canape.price + "€";
+  const productPrice = canape.price;
   // Création item content settings
   const divItmContSett = document.createElement("div");
   divItmContSett.classList.add("cart__item__content__settings");
@@ -41,6 +42,7 @@ function generateProductArticle(canape, cartProduct) {
   input.min = "1";
   input.max = "100";
   input.setAttribute("value", cartProduct.productQuantity);
+  input.addEventListener("input", cartQuantityModifications)
 
   // Création du delete
   const divItmContSettDel = document.createElement("div");
@@ -48,6 +50,7 @@ function generateProductArticle(canape, cartProduct) {
   const deleteItem = document.createElement("p");
   deleteItem.classList.add("deleteItem");
   deleteItem.innerText = "Supprimer";
+  deleteItem.addEventListener("click", cartDeleteItem);
 
   // Création dans le DOM
   const cartItems = document.querySelector("#cart__items");
@@ -65,20 +68,19 @@ function generateProductArticle(canape, cartProduct) {
   divItmContSettQuant.appendChild(quantity);
   divItmContSettQuant.appendChild(input);
   divItmContSettDel.appendChild(deleteItem);
+
+  return productPrice
 }
 
 /**
  * Génération de la feuille panier
  */
-function generateCartSheet() {
+async function generateCartSheet() {
   if (productCart) {
     productCart.forEach(async (cartProduct) => {
-      const canape = await fetchJSON(
-        "http://localhost:3000/api/products/" + cartProduct.productId
-      );
+      const canape = await fetchJSON("http://localhost:3000/api/products/" + cartProduct.productId);
       generateProductArticle(canape, cartProduct);
-      totalQuantity();
-      totalPrice(canape);
+      calculTotaux();
     });
   }
 }
@@ -102,6 +104,8 @@ function cartQuantityModifications(event) {
     }
   }
   localStorage.setItem("product", JSON.stringify(productCart));
+  document.querySelector("#totalQuantity").innerHTML ="";
+  calculTotaux();
 }
 /**
  * Suppression d'un article
@@ -121,36 +125,38 @@ function cartDeleteItem(event) {
   }
   localStorage.setItem("product", JSON.stringify(productCart));
   article.remove();
+  document.querySelector("#totalQuantity").innerHTML ="";
+  calculTotaux();
+}
+/**
+ * Calcul totaux
+ */
+function calculTotaux(){
+  let total = 0
+  let totalQuantity = 0
+  if (productCart) {
+    productCart.forEach(async (cartProduct) => {
+    const canape = await fetchJSON("http://localhost:3000/api/products/" + cartProduct.productId);
+    total += canape.price * cartProduct.productQuantity;
+    totalQuantity += cartProduct.productQuantity;
+    afficherTotalQuantity(totalQuantity);
+    afficherTotalPrice(total);
+    }
+  )};
 }
 /**
  * Affiche le total des articles
  */
-function totalQuantity() {
-  // calcul du total du nombres d'articles
-  let totalQuantity = 0;
-  if (productCart) {
-    productCart.forEach((productTotal) => {
-      totalQuantity += productTotal.productQuantity;
-    });
-  }
-  // L'ajoute au DOM
+function afficherTotalQuantity(totalQuantity) {
   const totalArticle = document.querySelector("#totalQuantity");
   totalArticle.innerText = totalQuantity;
 }
 /**
  * Affiche le prix total
  */
-function totalPrice(canape) {
-  //Calcul le prix total
-  let totalPrice = 0;
-  if (productCart) {
-    productCart.forEach((product) => {
-      totalPrice += canape.price * product.productQuantity;
-    });
-  }
-  // L'ajoute au DOM
+function afficherTotalPrice(total) {
   const totalPriceElement = document.querySelector("#totalPrice");
-  totalPriceElement.innerText = totalPrice;
+  totalPriceElement.innerText = total;
 }
 /**
  * Initialisation de la récupération des données de l'API et de créations des éléments
@@ -158,19 +164,93 @@ function totalPrice(canape) {
 async function init() {
   await generateCartSheet();
 }
+/**
+ * Vérification du formulaire
+ */
+function verifForm() {
+  const firstName = document.getElementById("firstName").value;
+  const lastName = document.getElementById("lastName").value;
+  const address = document.getElementById("address").value;
+  const ville = document.getElementById("city").value;
+  const email = document.getElementById("email").value;
+
+  const firstNameRegex = /^[a-zA-Z]{3,30}$/;
+  const lastNameRegex = /^[a-zA-Z]{3,50}$/;
+  const addressRegex = /^.{5,150}$/;
+  const villeRegex = /^[a-zA-Z]{3,30}$/;
+  const emailRegex =
+    /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+
+  // Vérification des différents champs
+  if (!firstNameRegex.test(firstName)) {
+    // Affichage d'un message d'erreur
+    document.getElementById("firstNameErrorMsg").innerHTML =
+      "Le prénom n'est pas valide";
+  }
+
+  if (!lastNameRegex.test(lastName)) {
+    document.getElementById("lastNameErrorMsg").innerHTML =
+      "Le nom n'est pas valide";
+  }
+
+  if (!addressRegex.test(address)) {
+    document.getElementById("addressErrorMsg").innerHTML =
+      "L'adresse n'est pas valide";
+  }
+
+  if (!villeRegex.test(city)) {
+    document.getElementById("cityErrorMsg").innerHTML =
+      "La ville n'est pas valide";
+  }
+
+  if (!emailRegex.test(email)) {
+    document.getElementById("emailErrorMsg").innerHTML =
+      "L'email n'est pas valide";
+  }
+
+  // Envoie si tout est valide
+  if (
+    firstNameRegex.test(firstName) &&
+    lastNameRegex.test(lastName) &&
+    addressRegex.test(address) &&
+    villeRegex.test(ville) &&
+    emailRegex.test(email)
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+}
+/**
+ * Envoi du formulaire
+ */
+async function sendForm(){
+  verifForm();
+  if(verifForm()){
+    let contact ={
+      firstName: `${firstName}`,
+      lastName: `${lastName}`,
+      address: `${adresse}`,
+      city: `${ville}`,
+      email: `${email}`,
+    }
+    let contactLinea = JSON.stringify(contact)
+    let cart = productCart;
+    let response = await fetch ("http://localhost:3000/api/products/order", {
+      method: 'POST',
+      headers:{'Content-type': 'application/json;charset=utf-8'},
+      body:JSON.stringify({contactLinea,cart })
+    });
+    let result = await response.json();
+    if(result){
+      window.location.href="../html/confirmation.html" + result.orderid;
+    }
+  }else {
+    return false
+  }
+}
+
+
 // Le code principal
-init();
-// Modification de la quantité
-let cartQuantityModif = document.querySelectorAll(".itemQuantity");
-cartQuantityModif.forEach((inputElement) =>
-  inputElement.addEventListener("input", () => {
-    console.log("modification");
-  })
-);
-// Suppression d'un article
-let cartDelete = document.querySelectorAll(".deleteItem");
-cartDelete.forEach((item) => {
-  item.addEventListener("click", () => {
-    console.log("input");
-  });
-});
+ init();
+document.querySelector("#order").addEventListener("click", sendForm);
