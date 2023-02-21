@@ -42,7 +42,7 @@ function generateProductArticle(canape, cartProduct) {
   input.min = "1";
   input.max = "100";
   input.setAttribute("value", cartProduct.productQuantity);
-  input.addEventListener("input", cartQuantityModifications)
+  input.addEventListener("input", cartQuantityModifications);
 
   // Création du delete
   const divItmContSettDel = document.createElement("div");
@@ -69,7 +69,7 @@ function generateProductArticle(canape, cartProduct) {
   divItmContSettQuant.appendChild(input);
   divItmContSettDel.appendChild(deleteItem);
 
-  return productPrice
+  return productPrice;
 }
 
 /**
@@ -78,7 +78,9 @@ function generateProductArticle(canape, cartProduct) {
 async function generateCartSheet() {
   if (productCart) {
     productCart.forEach(async (cartProduct) => {
-      const canape = await fetchJSON("http://localhost:3000/api/products/" + cartProduct.productId);
+      const canape = await fetchJSON(
+        "http://localhost:3000/api/products/" + cartProduct.productId
+      );
       generateProductArticle(canape, cartProduct);
       calculTotaux();
     });
@@ -104,7 +106,7 @@ function cartQuantityModifications(event) {
     }
   }
   localStorage.setItem("product", JSON.stringify(productCart));
-  document.querySelector("#totalQuantity").innerHTML ="";
+  document.querySelector("#totalQuantity").innerHTML = "";
   calculTotaux();
 }
 /**
@@ -125,24 +127,26 @@ function cartDeleteItem(event) {
   }
   localStorage.setItem("product", JSON.stringify(productCart));
   article.remove();
-  document.querySelector("#totalQuantity").innerHTML ="";
+  document.querySelector("#totalQuantity").innerHTML = "";
   calculTotaux();
 }
 /**
  * Calcul totaux
  */
-function calculTotaux(){
-  let total = 0
-  let totalQuantity = 0
+function calculTotaux() {
+  let total = 0;
+  let totalQuantity = 0;
   if (productCart) {
     productCart.forEach(async (cartProduct) => {
-    const canape = await fetchJSON("http://localhost:3000/api/products/" + cartProduct.productId);
-    total += canape.price * cartProduct.productQuantity;
-    totalQuantity += cartProduct.productQuantity;
-    afficherTotalQuantity(totalQuantity);
-    afficherTotalPrice(total);
-    }
-  )};
+      const canape = await fetchJSON(
+        "http://localhost:3000/api/products/" + cartProduct.productId
+      );
+      total += canape.price * cartProduct.productQuantity;
+      totalQuantity += cartProduct.productQuantity;
+      afficherTotalQuantity(totalQuantity);
+      afficherTotalPrice(total);
+    });
+  }
 }
 /**
  * Affiche le total des articles
@@ -168,89 +172,90 @@ async function init() {
  * Vérification du formulaire
  */
 function verifForm() {
-  const firstName = document.getElementById("firstName").value;
-  const lastName = document.getElementById("lastName").value;
-  const address = document.getElementById("address").value;
-  const ville = document.getElementById("city").value;
-  const email = document.getElementById("email").value;
+  let isValid = true;
+  const firstName = document.getElementById("firstName");
+  const lastName = document.getElementById("lastName");
+  const address = document.getElementById("address");
+  const city = document.getElementById("city");
+  const email = document.getElementById("email");
 
-  const firstNameRegex = /^[a-zA-Z]{3,30}$/;
-  const lastNameRegex = /^[a-zA-Z]{3,50}$/;
+  const firstNameRegex = /^[\w\' ]{3,40}$/;
+  const lastNameRegex = /^[\w\' ]{3,40}$/;
   const addressRegex = /^.{5,150}$/;
-  const villeRegex = /^[a-zA-Z]{3,30}$/;
-  const emailRegex =
-    /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+  const villeRegex = /^[\w\' ]{3,40}$/;
+  const emailRegex = /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]{2,5}$/;
 
   // Vérification des différents champs
-  if (!firstNameRegex.test(firstName)) {
+  if (!firstNameRegex.test(firstName.value)) {
     // Affichage d'un message d'erreur
-    document.getElementById("firstNameErrorMsg").innerHTML =
-      "Le prénom n'est pas valide";
+    firstName.nextElementSibling.innerHTML = "Le prénom n'est pas valide";
+    isValid = false;
+  } else {
+    firstName.nextElementSibling.innerHTML = "";
   }
 
-  if (!lastNameRegex.test(lastName)) {
-    document.getElementById("lastNameErrorMsg").innerHTML =
-      "Le nom n'est pas valide";
+  if (!lastNameRegex.test(lastName.value)) {
+    lastName.nextElementSibling.innerHTML = "Le nom n'est pas valide";
+    isValid = false;
+  } else {
+    lastName.nextElementSibling.innerHTML = "";
   }
 
-  if (!addressRegex.test(address)) {
-    document.getElementById("addressErrorMsg").innerHTML =
-      "L'adresse n'est pas valide";
+  if (!addressRegex.test(address.value)) {
+    address.nextElementSibling.innerHTML = "L'adresse n'est pas valide";
+    isValid = false;
+  } else {
+    address.nextElementSibling.innerHTML = "";
   }
 
-  if (!villeRegex.test(city)) {
-    document.getElementById("cityErrorMsg").innerHTML =
-      "La ville n'est pas valide";
+  if (!villeRegex.test(city.value)) {
+    city.nextElementSibling.innerHTML = "La ville n'est pas valide";
+    isValid = false;
+  } else {
+    city.nextElementSibling.innerHTML = "";
   }
 
-  if (!emailRegex.test(email)) {
-    document.getElementById("emailErrorMsg").innerHTML =
-      "L'email n'est pas valide";
+  if (!emailRegex.test(email.value)) {
+    email.nextElementSibling.innerHTML = "L'email n'est pas valide";
+    isValid = false;
+  } else {
+    email.nextElementSibling.innerHTML = "";
   }
 
   // Envoie si tout est valide
-  if (
-    firstNameRegex.test(firstName) &&
-    lastNameRegex.test(lastName) &&
-    addressRegex.test(address) &&
-    villeRegex.test(ville) &&
-    emailRegex.test(email)
-  ) {
-    return true;
-  } else {
-    return false;
-  }
+  return isValid;
 }
 /**
  * Envoi du formulaire
  */
-async function sendForm(){
-  verifForm();
-  if(verifForm()){
-    let contact ={
-      firstName: `${firstName}`,
-      lastName: `${lastName}`,
-      address: `${adresse}`,
-      city: `${ville}`,
-      email: `${email}`,
+async function sendForm(evt) {
+  if (verifForm()) {
+    let contact = {
+      firstName: `${firstName.value}`,
+      lastName: `${lastName.value}`,
+      address: `${address.value}`,
+      city: `${city.value}`,
+      email: `${email.value}`,
+    };
+    let products = productCart.map((product) => product.productId);
+    try {
+      const response = await fetch("http://localhost:3000/api/products/order", {
+        method: "POST",
+        headers: { "Content-type": "application/json;charset=utf-8" },
+        body: JSON.stringify({ contact: contact, products: products }),
+      });
+      const result = await response.json();
+      window.location.href =
+        "../html/confirmation.html?orderId=" + result.orderId;
+      // Penser à supprimer le panier dans confirmation.js SI l'orderId existe bien !!!
+    } catch (error) {
+      console.error("Ça va pas", error);
     }
-    let contactLinea = JSON.stringify(contact)
-    let cart = productCart;
-    let response = await fetch ("http://localhost:3000/api/products/order", {
-      method: 'POST',
-      headers:{'Content-type': 'application/json;charset=utf-8'},
-      body:JSON.stringify({contactLinea,cart })
-    });
-    let result = await response.json();
-    if(result){
-      window.location.href="../html/confirmation.html" + result.orderid;
-    }
-  }else {
-    return false
+  } else {
+    evt.preventDefault();
   }
 }
 
-
 // Le code principal
- init();
-document.querySelector("#order").addEventListener("click", sendForm);
+document.querySelector("form").addEventListener("submit", sendForm);
+init();
