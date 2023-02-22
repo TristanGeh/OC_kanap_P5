@@ -179,8 +179,8 @@ function verifForm() {
   const city = document.getElementById("city");
   const email = document.getElementById("email");
 
-  const firstNameRegex = /^[\w\' ]{3,40}$/;
-  const lastNameRegex = /^[\w\' ]{3,40}$/;
+  const firstNameRegex = /^[a-z ,.'-]+$/i;
+  const lastNameRegex = /^[a-z-Z0-9 ,.'-]+$/i;
   const addressRegex = /^.{5,150}$/;
   const villeRegex = /^[\w\' ]{3,40}$/;
   const emailRegex = /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]{2,5}$/;
