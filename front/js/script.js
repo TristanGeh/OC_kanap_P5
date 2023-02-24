@@ -8,7 +8,7 @@ function generateArticle(article) {
   // Création de l'ancre
   const ancreCanape = document.createElement("a");
   ancreCanape.href = "./product.html?id=" + article._id;
-  //Création de l'artcle + ses balises internes
+  //Création de l'article + ses balises internes
   const articleCanape = document.createElement("article");
   const imgCanape = document.createElement("img");
   imgCanape.src = article.imageUrl;

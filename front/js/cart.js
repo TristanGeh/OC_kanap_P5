@@ -247,9 +247,8 @@ async function sendForm(evt) {
       const result = await response.json();
       window.location.href =
         "../html/confirmation.html?orderId=" + result.orderId;
-      // Penser à supprimer le panier dans confirmation.js SI l'orderId existe bien !!!
     } catch (error) {
-      console.error("Ça va pas", error);
+      console.error(error);
     }
   } else {
     evt.preventDefault();
