@@ -18,7 +18,8 @@ function addToCart() {
   let itemQuantityString = document.getElementById("quantity").value;
   let itemQuantity = parseInt(itemQuantityString);
 
-  if (itemQuantity === 0) {
+  if (itemQuantity === 0 || colorValue === "") {
+    alert("Vous devez choisir une couleur et une quantité");
     return;
   }
   let existingProduct = productInf.find(function (product) {
